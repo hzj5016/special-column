@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 import store from './store/store'
 import { Provider } from 'react-redux'
-import GlobalStyle from './reset'
+import GlobalStyle from './style'
 import GlobalIcon from './static/icon/iconfont'
 import Header from './base/header'
 

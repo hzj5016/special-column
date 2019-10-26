@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import * as actionCreators from './store/actionCreators'
 import {
   HeaderWrap,
   Logo,
@@ -7,10 +8,49 @@ import {
   NavItem,
   NavSearchWrap,
   NavSearch,
+  SearchInfo,
+  SearchTitle,
+  SearchSwap,
+  SearchItem,
   UserandWritter,
   User,
   Button,
 } from './style'
+
+// 显示热门搜索
+function isShowList(props) {
+  const { focused, list, page, mouseIn, mouseEnter, mouseLeave, changePage } = props
+  // 把 immutable 数组转化为普通 js 数组
+  const jsList = list.toJS()
+  const showList = []
+  if (jsList.length) {
+    for (let i = (page - 1) * 8; i < page * 8; i++) {
+      if (i < jsList.length) {
+        let v = jsList[i]
+        showList.push(
+          <SearchItem key={v}>{v}</SearchItem>
+        )
+      } else {
+        break
+      }
+    }
+  }
+  if (focused || mouseIn) {
+    return (
+      <SearchInfo onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
+        <SearchTitle>
+          热门搜索
+          <SearchSwap onClick={changePage}>换一换</SearchSwap>
+        </SearchTitle>
+        <div>
+          {showList}
+        </div>
+      </SearchInfo>
+    )
+  } else {
+    return null
+  }
+}
 
 function Header(props) {
   return (
@@ -28,6 +68,7 @@ function Header(props) {
             onBlur={props.inputBlur}
           />
           <i className={props.focused ? 'iconfont focused' : 'iconfont'}>&#xe600;</i>
+          {isShowList(props)}
         </NavSearchWrap>
       </Nav>
       <UserandWritter>
@@ -41,22 +82,33 @@ function Header(props) {
 const mapStateToProps = (state) => {
   return {
     // 拆分 reducer
-    focused: state.homeHeader.focused
+    focused: state.homeHeader.get('focused'),
+    list: state.homeHeader.get('list'),
+    page: state.homeHeader.get('page'),
+    mouseIn: state.homeHeader.get('mouseIn')
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
     inputFocus() {
-      const action = {
-        type: 'search_focus'
-      }
-      dispatch(action)
+      dispatch(actionCreators.getSearchList())
+      dispatch(actionCreators.searchFocus())
     },
     inputBlur() {
-      const action = {
-        type: 'search_blur'
-      }
+      const action = actionCreators.searchBlur()
+      dispatch(action)
+    },
+    mouseEnter() {
+      const action = actionCreators.mouseIn()
+      dispatch(action)
+    },
+    mouseLeave() {
+      const action = actionCreators.mouseLeave()
+      dispatch(action)
+    },
+    changePage() {
+      const action = actionCreators.changePage()
       dispatch(action)
     }
   }
